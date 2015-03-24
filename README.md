@@ -4,3 +4,7 @@
 командой  javac -d bin src/Hello_World.java   мы компилируем
 команда java -classpath ./bin Hello_World     запускает программу
 это все выполняется при запуске start.bat
+#это проект мавен
+#собирается командой "mvn package"
+#запускается командой "java -jar taskmaven-1.0.jar"
+>>>>>>> tasks/maven
