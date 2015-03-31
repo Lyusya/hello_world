@@ -1,8 +1,11 @@
 package lyusya;
 
 import java.sql.*;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 
 public class App {
 
@@ -50,8 +53,18 @@ public class App {
      * добавление данных в таблицу
      */
     private static void doInsert(Connection conn) throws SQLException {
-        Statement stmt = conn.createStatement();
-        stmt.executeUpdate("INSERT INTO TEST VALUES(1, 'Hello')");
+        HashMap<Integer, String> vals = new HashMap<Integer, String>();
+        vals.put(100, "Hello");
+        vals.put(200, "World");
+
+        PreparedStatement stmt = conn.prepareStatement("INSERT INTO TEST VALUES(?, ?)");
+        for(Integer i: vals.keySet()){
+        stmt.setInt(1, i);
+        stmt.setString(2, vals.get(i));
+        stmt.addBatch();
+        }
+        stmt.executeBatch();
+
         stmt.close();
     }
 
@@ -62,7 +75,12 @@ public class App {
         Statement stmt = conn.createStatement();
         ResultSet rs = stmt.executeQuery("select * from TEST");
         while (rs.next()) {
-            logger.severe(String.format("id = %s, name = %s", rs.getString("id"), rs.getString("name")));
+            LinkedList<String> arr = new LinkedList<String>();
+            int cnt = rs.getMetaData().getColumnCount();
+            for(int i=1;i<=cnt;i++){
+                arr.add(rs.getString(i));
+            }
+            logger.severe(arr.toString());
         }
         stmt.close();
     }
@@ -72,7 +90,7 @@ public class App {
      */
     private static void doUpdate(Connection conn) throws SQLException {
         Statement stmt = conn.createStatement();
-        stmt.executeUpdate("UPDATE TEST SET NAME='Hi' WHERE ID=1");
+        stmt.executeUpdate("UPDATE TEST SET NAME='Hi' WHERE ID=100");
         stmt.close();
     }
 
@@ -81,8 +99,7 @@ public class App {
      */
     private static void doDelete(Connection conn) throws SQLException {
         Statement stmt = conn.createStatement();
-        PreparedStatement ps = conn.prepareStatement("DELETE FROM TEST WHERE ID=1");
-        ps.executeUpdate();
+        stmt.executeUpdate("TRUNCATE TABLE TEST");
         stmt.close();
         logger.severe("data deleted");
     }
